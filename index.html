@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Gua Indonesia</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  <!-- end favicon -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <link rel="stylesheet" href="geocoding/leaflet-search.src.css" />
+  <link rel="stylesheet" href="L.Control.Layers.Tree.css" />
+  <link rel="stylesheet" href="L.Icon.Pulse.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"
+    integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.76.0/dist/L.Control.Locate.min.css" />
+  <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+  <link rel="leaflet.defaultextent.css" />
+  <!-- <link href="style.eb127ecea7b7559c70ac.css" rel="stylesheet" /> -->
+  <!-- Font awesome icon (links) -->
+
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      width: 100%;
+      margin: 0px;
+    }
+
+    .Cave {
+      margin-left: 6px;
+      margin-top: 0px;
+      padding-right: 5px;
+      padding-bottom: 4px;
+      object-position: center;
+      vertical-align: middle;
+    }
+
+    .kotak {
+      margin-left: 2px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    /* .FO {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    } */
+
+    .home {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    .FAT {
+      margin-left: 8px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 2px;
+      vertical-align: middle;
+    }
+
+
+
+    #map>div.leaflet-control-container>div.leaflet-bottom.leaflet-left>div.leaflet-control.leaflet-bar {
+      border: 0px;
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div.leaflet-control-locate.leaflet-bar.leaflet-control>a {
+      background-color: black;
+    }
+
+
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div.leaflet-control-locate.leaflet-bar.leaflet-control>a>span {
+      background-color: #ff0000;
+      transition: transform 0.3s ease-in-out;
+      /* Animasi perubahan ukuran */
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div.leaflet-control-locate.leaflet-bar.leaflet-control>a>span:hover {
+      transform: scale(2);
+      /* Memperbesar elemen saat mouse diarahkan */
+    }
+
+
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div.leaflet-bar.leaflet-control-defaultextent.leaflet-control>a {
+      background-color: #030000;
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-bottom.leaflet-right>div.leaflet-control-layers.leaflet-control>a {
+      background-color: #030000;
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-bottom.leaflet-right>div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control {
+      background-color: #d7d5d5;
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-bottom.leaflet-right>div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control>section>div.leaflet-control-layers-separator {
+      border-color: rgb(150, 149, 149);
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-left>div>a.search-button {
+      background-color: #fcfc01;
+      border-color: #ff0000;
+    }
+
+    /*pop-up*/
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .popup {
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      position: fixed;
+      opacity: 0;
+      transition: all 0.2s ease-in;
+    }
+
+    .popup__content {
+      width: 400px;
+      max-width: 100%;
+      height: auto;
+      text-align: center;
+      position: relative;
+      margin: 10vh auto;
+    }
+
+    .popup__image {
+      width: 100%;
+      margin-bottom: 15px;
+      z-index: 99999;
+    }
+
+    .popup__dismiss {
+      position: absolute;
+      top: -20px;
+      right: 0;
+      width: 25px;
+    }
+
+    .popup--show {
+      opacity: 1;
+      z-index: 99999;
+    }
+
+    .popup--close {
+      display: none;
+      transition: all 0.2s ease-out;
+    }
+
+    .search-input {
+      font-family: Courier;
+    }
+
+    .search-input,
+    .leaflet-control-search {
+      max-width: 150px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- pop-up -->
+  <div class="popup">
+    <div class="popup__content">
+      <img class="popup__image" src="img/basegis.png" alt="Popup Stiker">
+      <img class="popup__dismiss" src="img/btn-close.png" alt="Close">
+    </div>
+  </div>
+  <!-- end-pop-up -->
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet"></script>
+  <script src="https://unpkg.com/leaflet.icon.pulse"></script>
+  <script src="geocoding/leaflet-search.src.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+
+  <script src="L.Icon.Pulse.js"></script>
+  <script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+  <script src="leaflet.defaultextent.js"></script>
+  <script src="L.Control.Layers.Tree.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"
+    integrity="sha512-OFs3W4DIZ5ZkrDhBFtsCP6JXtMEDGmhl0QPlmWYBJay40TT1n3gt2Xuw8Pf/iezgW9CdabjkNChRqozl/YADmg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+  <!-- Geolocation -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.76.0/dist/L.Control.Locate.min.js"
+    charset="utf-8"></script>
+  <script src="https://sikk.magelangkab.go.id/assets/homepage//assets/js/antpath/leaflet-ant-path.js"></script>
+  <script src="https://sikk.magelangkab.go.id/assets/homepage//assets/js/antpath/leaflet-ant-path.es6.js"></script>
+
+  <script>
+    // Menset leaflet leaflet didalam id 'map'
+    var map = L.map("map", {
+      zoomControl: false,
+    }).setView([-4.3796958349529405, 120.00423277007731], 5);
+
+    L.control
+      .scale({
+        metric: true,
+      })
+      .addTo(map);
+
+    var OpenStreetMap = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        'WebGIS Design © <a href="https://www.youtube.com/channel/UCw1KKeYlrcgVf4-PGDyvG2Q" target=_blank >Mai Warman</a> 2024',
+    }).addTo(map);
+
+    // Tambahkan logo di pojok kanan bawah
+    var logoControl = L.control({
+      position: 'bottomleft'
+    });
+
+    logoControl.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+      var img = document.createElement('img');
+      img.src = 'img/logo.png';
+      img.style.width = '70px';
+      img.style.height = '70px';
+      img.style.position = 'relative';
+      img.style.transition = 'transform 0.5s ease-in-out'; // animasi transisi
+
+      // Fungsi untuk melakukan flip pada gambar
+      function flipImage() {
+        img.style.transform = 'scaleX(-1)';
+        setTimeout(function () {
+          img.style.transform = 'scaleX(1)';
+        }, 500); // waktu sebelum membalikkan kembali
+      }
+
+      // Panggil fungsi flip gambar setiap 4 detik
+      setInterval(flipImage, 4000);
+
+      div.appendChild(img);
+      return div;
+    };
+
+    logoControl.addTo(map);
+
+
+    // Buat fungsi untuk menyesuaikan ukuran peta saat ukuran halaman berubah
+    function resizeMap() {
+      var mapContainer = document.getElementById("map");
+      mapContainer.style.width = window.innerWidth + "px";
+      mapContainer.style.height = window.innerHeight + "px";
+      map.invalidateSize();
+    }
+
+    // Panggil fungsi resizeMap() saat halaman dimuat atau ukuran jendela browser berubah
+    window.addEventListener("resize", resizeMap);
+    window.addEventListener("DOMContentLoaded", resizeMap);
+
+
+
+    //mengaktifkan basemaps ke dalam leaflet
+
+    /* Control Layer Tree */
+
+    var googleStreets = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleHybrid = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleSat = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleTerrain = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+
+
+    // Definisi ikon gua
+var guaIcon = L.icon({
+  iconUrl: "img/cave.png",
+  iconSize: [20, 20],
+  className: "cave"
+});
+
+// Definisi ikon pulsasi
+var pulsingIcon = L.icon.pulse({
+  iconSize: [20, 20],
+  color: "red",
+  fillColor: "red",
+  heartbeat: 1
+});
+
+// Layer GeoJSON untuk marker gua dan ikon pulsasi
+var guaAndPulsingLayer = L.geoJson(null, {
+  pointToLayer: function (feature, latlng) {
+    var markerOptions = {
+      icon: guaIcon // Menggunakan ikon gua
+    };
+    if (feature.properties && feature.properties.pulsing) {
+      markerOptions.icon = pulsingIcon; // Menggunakan ikon pulsasi jika properti 'pulsing' tersedia
+    }
+    return L.marker(latlng, markerOptions);
+  },
+  onEachFeature: function (feature, layer) {
+    layer.bindPopup(function (layer) {
+      return `
+        <table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>
+          <tr style="background-color: #FF0000;">
+            <td style="border: 0.4px solid black; border-color: grey; padding: 8px; color: white;"><strong>Nama Gua</strong></td>
+            <td style="border: 0.4px solid black; border-color: grey; padding: 8px; color: white;">${layer.feature.properties.Nama_Gua}</td>
+          </tr>
+          <tr style='background-color: #BABBD1;'>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Desa</strong></td>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>${feature.properties.Kelurahan}</td>
+          </tr>
+          <tr style='background-color: #BABBD1;'>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Kecamatan</strong></td>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>${feature.properties.Kec}</td>
+          </tr>
+          <tr style='background-color: #BABBD1;'>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Kabupaten</strong></td>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>${feature.properties.Kab}</td>
+          </tr>
+          <tr style='background-color: #BABBD1;'>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Provinsi</strong></td>
+            <td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>${feature.properties.Prov}</td>
+          </tr>
+        </table>
+        <br>
+        <div style='text-align:center;'>
+          <a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&travelmode=driving'>
+            <span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none; border: none;'>Go Location</span>
+          </a>
+        </div>
+      `;
+    });
+  }
+});
+
+// Marker Cluster Group untuk mengelompokkan marker gua dan pulsasi
+var markers = L.markerClusterGroup();
+
+// Memuat data GeoJSON dari file "gua.geojson"
+$.getJSON("gua.geojson", function (data) {
+  guaAndPulsingLayer.addData(data);
+  markers.addLayer(guaAndPulsingLayer);
+  map.addLayer(markers);
+});
+
+// Event listener untuk overlayadd dan overlayremove
+map.on('overlayadd', function (event) {
+  if (event.name === 'icon_gua') {
+    map.addLayer(markers);
+    console.log(event.name === 'icon_gua'); // seharusnya mengembalikan true
+  }
+});
+
+map.on('overlayremove', function (event) {
+  if (event.name === 'icon_gua') {
+    map.removeLayer(markers);
+    console.log(event.name === 'icon_gua'); // seharusnya mengembalikan true
+  }
+});
+
+
+
+    // KARST SUMATRA
+    map.createPane("karst_sumatra");
+    map.getPane("karst_sumatra").style.zIndex = 400;
+    var karst_sumatra = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karst_sumatra",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karst_sumatra.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karst_sumatra.geojson", function (data) {
+      karst_sumatra.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // KARST JAWA
+    map.createPane("karst_jawa");
+    map.getPane("karst_jawa").style.zIndex = 400;
+    var karst_jawa = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karst_jawa",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karst_jawa.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karts_jawa.geojson", function (data) {
+      karst_jawa.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // KARST KALIMANTAN
+    map.createPane("karst_kalimantan");
+    map.getPane("karst_kalimantan").style.zIndex = 400;
+    var karst_kalimantan = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karst_kalimantan",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karst_kalimantan.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karst_kalimantan.geojson", function (data) {
+      karst_kalimantan.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // KARST MALUKU
+    map.createPane("karts_maluku");
+    map.getPane("karts_maluku").style.zIndex = 400;
+    var karts_maluku = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karts_maluku",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karts_maluku.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karts_maluku.geojson", function (data) {
+      karts_maluku.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // KARST SUNDA KECIL
+    map.createPane("karst_sundakecil");
+    map.getPane("karst_sundakecil").style.zIndex = 400;
+    var karst_sundakecil = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karst_sundakecil",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karst_sundakecil.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karst_sundakecil.geojson", function (data) {
+      karst_sundakecil.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // KARST SULAWESI
+    map.createPane("karts_sulawesi");
+    map.getPane("karts_sulawesi").style.zIndex = 400;
+    var karts_sulawesi = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karts_sulawesi",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karts_sulawesi.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karts_sulawesi.geojson", function (data) {
+      karts_sulawesi.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // KARST PAPUA
+    map.createPane("karts_papua");
+    map.getPane("karts_papua").style.zIndex = 400;
+    var karts_papua = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "karts_papua",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            karts_papua.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kawasan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.FORMASI_SA}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Desa</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.DESA}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kecamatan</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KECAMATAN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Kabupaten</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.KABUPATEN}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Provinsi</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.PROVINSI}</td>
+    </tr>
+  </table>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("karts_papua.geojson", function (data) {
+      karts_papua.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // MAP INFO
+
+    var basemapTree = {
+      label: "<span style='font-family: Arial; font-size: 12px; text-transform: uppercase;font-weight: bold;'>basemap</span>",
+      collapsed: false,
+      children: [
+        {
+          label: "Google Hybrid",
+          layer: googleHybrid,
+        },
+        {
+          // label: "Google Satellite",
+          // layer: googleSat,
+        },
+        {
+          label: "Google Street",
+          layer: googleStreets,
+        },
+        {
+          // label: "Google Terrain",
+          // layer: googleTerrain,
+        },
+        {
+          label: "Topo Map",
+          layer: OpenStreetMap,
+        },
+      ],
+    };
+
+    var overlaysTree = {
+      label: "<span style='font-family: Arial; font-size: 12px; text-transform: uppercase;font-weight: bold;'>Map info</span>",
+      children: [
+
+        {
+          label: "<b><img src='img/cave.png' width='20' height='20' style='margin: 5px; vertical-align: middle;'>Cave</b>",
+          layer: markers,
+        },
+        {
+          label: "<b><img class='kotak' src='img/kota.png' width='20' height='20' style='margin-left: 11px;'> Area Karst</b>",
+          collapsed: true,
+          children: [
+            {
+              label: "Karst Sumatra",
+              layer: karst_sumatra,
+            },
+            {
+              label: "Karst Jawa",
+              layer: karst_jawa,
+            },
+            {
+              label: "Karst Kalimantan",
+              layer: karst_kalimantan,
+            },
+            {
+              label: "Karst Maluku",
+              layer: karts_maluku,
+            },
+            {
+              label: "Karst Sunda Kecil",
+              layer: karst_sundakecil,
+            },
+            {
+              label: "Karst Sulawesi",
+              layer: karts_sulawesi,
+            },
+            {
+              label: "Karst Papua",
+              layer: karts_papua,
+            },
+
+          ],
+        },
+
+      ],
+    };
+
+    L.control.layers
+      .tree(basemapTree, overlaysTree, {
+        collapsed: true,
+        position: "bottomright",
+      })
+      .addTo(map);
+
+
+
+    map.attributionControl.setPrefix(false);
+
+    // SET VIEW
+    var resetControl = L.control.defaultExtent({
+      position: "topright",
+      maxWidth: 100,
+      maxHeight: 100,
+      backgroundColor: "white",
+      borderColor: "#ccc",
+      borderWeight: 1,
+      text: '<img src="img/rumah.png" alt="Rumah" style="width:23px;height:22px;object-position: center; vertical-align: middle; transition: transform 0.3s ease;" onmouseover="this.style.transform=\'scale(2)\'" onmouseout="this.style.transform=\'scale(1)\'">',
+      title: "Set View"
+    });
+
+    resetControl.addTo(map);
+
+
+    // My Location
+    L.control
+      .locate({
+        position: "topright",
+        locateOptions: {
+          enableHighAccuracy: true,
+        },
+      })
+      .addTo(map);
+
+    //Geocoding
+    map.addControl(
+      new L.Control.Search({
+        url: "https://nominatim.openstreetmap.org/search?format=json&q={s}",
+        jsonpParam: "json_callback",
+        propertyName: "display_name",
+        propertyLoc: ["lat", "lon"],
+        marker: L.circleMarker([0, 0], {
+          radius: 30,
+        }),
+        autoCollapse: true,
+        autoType: false,
+        minLength: 2,
+      })
+    );
+
+    let options = {
+      position: "topright",
+      unit: "kilometres",
+      useSubunits: true,
+      clearMeasurementsOnStop: true,
+      showBearings: true,
+      bearingTextIn: "In",
+      bearingTextOut: "Out",
+      tooltipTextFinish: "Click to <b>finish line</b><br>",
+      tooltipTextDelete: "Press SHIFT-key and click to <b>delete point</b>",
+      tooltipTextMove: "Click and drag to <b>move point</b><br>",
+      tooltipTextResume: "<br>Press CTRL-key and click to <b>resume line</b>",
+      tooltipTextAdd: "Press CTRL-key and click to <b>add point</b>",
+      measureControlTitleOn: "Turn on PolylineMeasure",
+      measureControlTitleOff: "Turn off PolylineMeasure",
+      measureControlLabel: "&#8614;",
+      measureControlClasses: [],
+      showClearControl: true,
+      clearControlTitle: "Clear Measurements",
+      clearControlLabel: "&times",
+      clearControlClasses: [],
+      showUnitControl: true,
+      unitControlUnits: ["kilometres", "landmiles", "nauticalmiles"],
+      unitControlTitle: {
+        text: "Change Units",
+        kilometres: "kilometres",
+        landmiles: "land miles",
+        nauticalmiles: "nautical miles",
+      },
+      unitControlLabel: {
+        metres: "m",
+        kilometres: "km",
+        feet: "ft",
+        landmiles: "mi",
+        nauticalmiles: "nm",
+      },
+      unitControlClasses: [],
+      tempLine: {
+        color: "#00f",
+        weight: 2,
+      },
+      fixedLine: {
+        color: "red",
+        weight: 2,
+      },
+      startCircle: {
+        color: "#000",
+        weight: 1,
+        fillColor: "#0f0",
+        fillOpacity: 1,
+        radius: 3,
+      },
+      intermedCircle: {
+        color: "#000",
+        weight: 1,
+        fillColor: "#ff0",
+        fillOpacity: 1,
+        radius: 3,
+      },
+      currentCircle: {
+        color: "#000",
+        weight: 1,
+        fillColor: "#f0f",
+        fillOpacity: 1,
+        radius: 3,
+      },
+      endCircle: {
+        color: "#000",
+        weight: 1,
+        fillColor: "#f00",
+        fillOpacity: 1,
+        radius: 3,
+      },
+    };
+
+    // Membuat kontrol polylineMeasure dengan opsi yang diberikan
+    let polylineMeasure = L.control.polylineMeasure(options);
+
+    // Menambahkan kontrol polylineMeasure ke peta
+    polylineMeasure.addTo(map);
+
+    // Menyembunyikan kontrol saat dimuat
+    polylineMeasure._container.style.display = 'none';
+
+    // Menanggapi peristiwa mouse di peta
+    map.on('mouseover', function () {
+      polylineMeasure._container.style.display = 'block';
+    });
+
+    map.on('mouseout', function () {
+      polylineMeasure._container.style.display = 'none';
+    });
+
+
+
+
+    // POPUP INFORMATION
+    var popup = document.querySelector(".popup");
+    var dismiss = document.querySelector(".popup__dismiss");
+    var shop = document.querySelector(".popup__shop");
+
+    setTimeout(function () {
+      popup.classList.add("popup--show");
+    }, 500);
+
+    dismiss.addEventListener("click", function () {
+      console.log("kil dismiss");
+      popup.classList.remove("popup--show");
+      popup.classList.add("popup--close");
+    });
+  </script>
+
+
+  <!-- POP UP -->
+  <script>
+    const toggleSwitch = document.querySelector(
+      '.theme-switch input[type="checkbox"]'
+    );
+
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    }
+
+    toggleSwitch.addEventListener("change", switchTheme, false);
+
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("theme", "dark"); //add this
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light"); //add this
+      }
+    }
+    const currentTheme = localStorage.getItem("theme")
+      ? localStorage.getItem("theme")
+      : null;
+
+    if (currentTheme) {
+      document.documentElement.setAttribute("data-theme", currentTheme);
+
+      if (currentTheme === "dark") {
+        toggleSwitch.checked = true;
+      }
+    }
+  </script>
+
+</body>
+
+</html>

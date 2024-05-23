@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FTTH Asianet</title>
+  <link rel="stylesheet" href="L.Control.Layers.Tree.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <link rel="stylesheet" href="L.Icon.Pulse.css" />
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.76.0/dist/L.Control.Locate.min.css" />
+  <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+  <link rel="leaflet.defaultextent.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="style.eb127ecea7b7559c70ac.css" rel="stylesheet" />
+
+  <title>Webgis Djakarta Caver</title>
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      width: 100%;
+      margin: 0px;
+    }
+
+    .OLT {
+      margin-left: 0px;
+      margin-top: 0px;
+      padding-right: 2px;
+      padding-bottom: 4px;
+      object-position: center;
+      vertical-align: middle;
+    }
+
+    .kotak {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    .FO {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    .home {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+    .FAT {
+      margin-left: 7px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 2px;
+      vertical-align: middle;
+    }
+
+    /*pop-up*/
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .popup {
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      position: fixed;
+      opacity: 0;
+      transition: all 0.2s ease-in;
+    }
+
+    .popup__content {
+      width: 400px;
+      max-width: 100%;
+      height: auto;
+      text-align: center;
+      position: relative;
+      margin: 10vh auto;
+    }
+
+    .popup__image {
+      width: 100%;
+      margin-bottom: 15px;
+      z-index: 99999;
+    }
+
+    .popup__dismiss {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 25px;
+    }
+
+    .popup--show {
+      opacity: 1;
+      z-index: 99999;
+    }
+
+    .popup--close {
+      display: none;
+      transition: all 0.2s ease-out;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- pop-up -->
+  <!-- <div class="popup">
+      <div class="popup__content">
+        <img class="popup__image" src="img/asianet.jpg" alt="Popup Stiker">
+        <img class="popup__dismiss" src="img/btn-close.png" alt="Close">
+     </div>
+  </div> -->
+  <!-- end-pop-up -->
+
+  <div id="map"></div>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+  <script src="L.Icon.Pulse.js"></script>
+  <script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+  <script src="leaflet.defaultextent.js"></script>
+  <script src="L.Control.Layers.Tree.js"></script>
+
+
+  <!-- Geolocation -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.76.0/dist/L.Control.Locate.min.js"
+    charset="utf-8"></script>
+
+  <script>
+    // Menset leaflet didalam id 'map'
+    var map = L.map("map").setView([-6.2146, 106.8451], 10);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution:
+        'WebGIS design © <a href="https://www.maiwarman.com/">Mai Warman</a> 2023',
+    }).addTo(map);
+
+    // Buat fungsi untuk menyesuaikan ukuran peta saat ukuran halaman berubah
+    function resizeMap() {
+      var mapContainer = document.getElementById("map");
+      mapContainer.style.width = window.innerWidth + "px";
+      mapContainer.style.height = window.innerHeight + "px";
+      map.invalidateSize();
+    }
+
+    // Panggil fungsi resizeMap() saat halaman dimuat atau ukuran jendela browser berubah
+    window.addEventListener("resize", resizeMap);
+    window.addEventListener("DOMContentLoaded", resizeMap);
+
+    let options = {
+      position: "topleft", // Position to show the control. Values: 'topright', 'topleft', 'bottomright', 'bottomleft'
+      unit: "kilometres", // Default unit the distances are displayed in. Values: 'kilometres', 'landmiles', 'nauticalmiles'
+      useSubunits: true, // Use subunits (metres/feet) in tooltips if distances are less than 1 kilometre/landmile
+      clearMeasurementsOnStop: true, // Clear all measurements when Measure Control is switched off
+      showBearings: true, // Whether bearings are displayed within the tooltips
+      bearingTextIn: "In", // language dependend label for inbound bearings
+      bearingTextOut: "Out", // language dependend label for outbound bearings
+      tooltipTextFinish: "Click to <b>finish line</b><br>",
+      tooltipTextDelete: "Press SHIFT-key and click to <b>delete point</b>",
+      tooltipTextMove: "Click and drag to <b>move point</b><br>",
+      tooltipTextResume: "<br>Press CTRL-key and click to <b>resume line</b>",
+      tooltipTextAdd: "Press CTRL-key and click to <b>add point</b>",
+      // language dependend labels for point's tooltips
+      measureControlTitleOn: "Turn on PolylineMeasure", // Title for the Measure Control going to be switched on
+      measureControlTitleOff: "Turn off PolylineMeasure", // Title for the Measure Control going to be switched off
+      measureControlLabel: "&#8614;", // Label of the Measure Control (Unicode symbols are possible)
+      measureControlClasses: [], // Classes to apply to the Measure Control
+      showClearControl: true, // Show a control to clear all the measurements
+      clearControlTitle: "Clear Measurements", // Title text to show on the Clear Control
+      clearControlLabel: "&times", // Label of the Clear Control (Unicode symbols are possible)
+      clearControlClasses: [], // Classes to apply to Clear Control
+      showUnitControl: true, // Show a control to change the units of measurements
+      unitControlUnits: ["kilometres", "landmiles", "nauticalmiles"],
+      // measurement units being cycled through by using the Unit Control
+      unitControlTitle: {
+        // Title texts to show on the Unit Control
+        text: "Change Units",
+        kilometres: "kilometres",
+        landmiles: "land miles",
+        nauticalmiles: "nautical miles",
+      },
+      unitControlLabel: {
+        // Unit symbols to show in the Unit Control and measurement labels
+        metres: "m",
+        kilometres: "km",
+        feet: "ft",
+        landmiles: "mi",
+        nauticalmiles: "nm",
+      },
+      unitControlClasses: [], // Classes to apply to the Unit Control
+      tempLine: {
+        // Styling settings for the temporary dashed line
+        color: "#00f", // Dashed line color
+        weight: 2, // Dashed line weight
+      },
+      fixedLine: {
+        // Styling for the solid line
+        color: "red", // Solid line color
+        weight: 2, // Solid line weight
+      },
+      startCircle: {
+        // Style settings for circle marker indicating the starting point of the polyline
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#0f0", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+      intermedCircle: {
+        // Style settings for all circle markers between startCircle and endCircle
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#ff0", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+      currentCircle: {
+        // Style settings for circle marker indicating the latest point of the polyline during drawing a line
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#f0f", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+      endCircle: {
+        // Style settings for circle marker indicating the last point of the polyline
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#f00", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+    };
+    let polylineMeasure = L.control.polylineMeasure(options);
+    polylineMeasure.addTo(map);
+
+    // menset BaseMap kedalam leaflet
+    L.tileLayer(
+      "https://{s}.tile.opentopomap.org/#map=5/-1.164/120.278/{z}/{x}/{y}.png",
+      {
+        maxZoom: 20,
+
+        // attribution: 'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+        // 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: "mapbox/streets-v11",
+        tileSize: 512,
+        zoomOffset: -1,
+      }
+    ).addTo(map);
+
+    //mengaktifkan basemaps ke dalam leaflet
+
+    /* Control Layer Tree */
+
+    var googleStreets = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleHybrid = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleSat = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleTerrain = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var openTopoMap = L.tileLayer(
+      "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 25,
+      }
+    );
+
+    // polygon GeoJSON Polygon
+    var admin_desa = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: "red", //warna fill
+          fillOpacity: 0.7, // transparansi fill
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "blue", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            admin_desa.resetStyle(e.target);
+            map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return (
+        "OLT : " + layer.feature.properties.Location + "<br>Coverage : 3 KM "
+      );
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("radiusOLT.geojson", function (data) {
+      admin_desa.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // line GeoJSON line
+    var Name = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "black", //memberikan warna garis luar polygon
+          weight: 4, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: "black", //warna fill
+          fillOpacity: 0.7, // transparansi fill
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "blue", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            Name.resetStyle(e.target);
+            map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return (
+        "Name FO : " +
+        layer.feature.properties.Name +
+        "<br>Length FO : " +
+        layer.feature.properties.Panjang +
+        "Meter"
+      );
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("FO.geojson", function (data) {
+      Name.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // GEOJSON POINT OLT
+    var pulsing = L.icon.pulse({
+      iconSize: [25, 25],
+      color: "red",
+      fillColor: "black",
+      heartbeat: 0.5,
+    });
+
+    var kab_pt = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: pulsing,
+        });
+      },
+    });
+
+    var Icon = L.icon({
+      iconUrl: "img/OLT.png",
+      iconSize: [25, 25],
+      className: "pulsing-icon",
+    });
+
+    var icon_OLT = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Icon,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup OLT
+      // console.log(layer.feature);
+      return (
+        "Location : " +
+        layer.feature.properties.Location +
+        "<br>Device : " +
+        layer.feature.properties.device +
+        "<br>Hostname : " +
+        layer.feature.properties.Hostname +
+        "<br>OLT Type : " +
+        layer.feature.properties.OLT_Type +
+        "<br>City : " +
+        layer.feature.properties.City +
+        "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    $.getJSON("OLTSeahawks.geojson", function (data) {
+      kab_pt.addData(data);
+      icon_OLT.addData(data);
+      map.addLayer(kab_pt); //kab_pt ditampilkan ketika halaman dipanggil
+      map.addLayer(icon_OLT);
+    });
+
+    map.on("overlayadd", (evenhandler) => {
+      if (
+        evenhandler.name ==
+        "4"
+      ) {
+        map.addLayer(icon_OLT);
+        // console.log(evenhandler)
+      }
+    });
+
+    map.on("overlayremove", (evenhandler) => {
+      if (
+        evenhandler.name ==
+        "4"
+      ) {
+        map.removeLayer(icon_OLT);
+        // console.log(evenhandler)
+      }
+    });
+
+    // POINT GEOJSON HOMEPASS
+    var home_pt = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return;
+      },
+    });
+    var Ico = L.icon({
+      iconUrl: "img/homepass.png",
+      iconSize: [20, 20],
+    });
+
+    var icon_homepass = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Ico,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup homepass
+      // console.log(layer.feature);
+      return (
+        "Site: " +
+        layer.feature.properties.Cluster_Ap +
+        "<br>Homepass : " +
+        layer.feature.properties.Homepass_E +
+        "<br>Type Site : " +
+        layer.feature.properties.Landed_HRB +
+        "<br>Project HP : " +
+        layer.feature.properties.Project_Fu +
+        "<br>Village : " +
+        layer.feature.properties.Desa_Kelur +
+        "<br>Region : " +
+        layer.feature.properties.Kabupaten_ +
+        "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    $.getJSON("homepass.geojson", function (data) {
+      home_pt.addData(data);
+      icon_homepass.addData(data);
+      map.addLayer(home_pt); //kab_pt ditampilkan ketika halaman dipanggil
+    });
+
+    map.on("overlayadd", (evenhandler) => {
+      if (
+        evenhandler.name ==
+        "7"
+      ) {
+        map.addLayer(icon_homepass);
+      
+      }
+    });
+
+    map.on("overlayremove", (evenhandler) => {
+      if (
+        evenhandler.name ==
+        "7"
+      ) {
+        map.removeLayer(icon_homepass);
+      
+      }
+    });
+
+    // POINT GEOJSON FAT BANTEN
+    var fat_banten = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return;
+      },
+    });
+    var Logo = L.icon({
+      iconUrl: "img/FAT.png",
+      iconSize: [15, 15],
+    });
+
+    var banten_logo = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Logo,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup homepass
+      // console.log(layer.feature);
+      return (
+        "Site: " +
+        layer.feature.properties.site_name +
+        "<br>Sub Site: " +
+        layer.feature.properties.sub_site_n +
+        "<br>Capacity HP: " +
+        layer.feature.properties.fat_capaci +
+        "<br>Status : " +
+        layer.feature.properties.status +
+        "<br>FAT Name : " +
+        layer.feature.properties.fat_name +
+        "<br>FAT ID : " +
+        layer.feature.properties.fat_id +
+        "<br>District : " +
+        layer.feature.properties.district +
+        "<br>City : " +
+        layer.feature.properties.city +
+        "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    $.getJSON("fat_banten.geojson",function (data) {
+      fat_banten.addData(data);
+      banten_logo.addData(data);
+      // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    });
+
+     // POINT GEOJSON FAT JAKARTA
+     var fat_jakarta = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return;
+      },
+    });
+    var Logo = L.icon({
+      iconUrl: "img/FAT.png",
+      iconSize: [15, 15],
+    });
+
+    var jakarta_logo = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Logo,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup fat
+      // console.log(layer.feature);
+      return (
+        "Site: " +
+        layer.feature.properties.site_name +
+        "<br>Sub Site: " +
+        layer.feature.properties.sub_site_n +
+        "<br>Capacity HP: " +
+        layer.feature.properties.fat_capaci +
+        "<br>Status : " +
+        layer.feature.properties.status +
+        "<br>FAT Name : " +
+        layer.feature.properties.fat_name +
+        "<br>FAT ID : " +
+        layer.feature.properties.fat_id +
+        "<br>District : " +
+        layer.feature.properties.district +
+        "<br>City : " +
+        layer.feature.properties.city +
+        "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+      );
+    });
+
+     /* 	MEMANGGIL DATA GEOJSON POINT */
+     $.getJSON("fat_jakarta.geojson",function (data) {
+      fat_jakarta.addData(data);
+      jakarta_logo.addData(data);
+      // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    });
+
+    // POINT GEOJSON FAT JABAR
+    var fat_jabar = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return;
+      },
+    });
+    var Logo = L.icon({
+      iconUrl: "img/FAT.png",
+      iconSize: [15, 15],
+    });
+
+    var jabar_logo = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Logo,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup fat
+      // console.log(layer.feature);
+      return (
+        "Site: " +
+        layer.feature.properties.site_name +
+        "<br>Sub Site: " +
+        layer.feature.properties.sub_site_n +
+        "<br>Capacity HP: " +
+        layer.feature.properties.fat_capaci +
+        "<br>Status : " +
+        layer.feature.properties.status +
+        "<br>FAT Name : " +
+        layer.feature.properties.fat_name +
+        "<br>FAT ID : " +
+        layer.feature.properties.fat_id +
+        "<br>District : " +
+        layer.feature.properties.district +
+        "<br>City : " +
+        layer.feature.properties.city +
+        "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+      );
+    });
+
+     /* 	MEMANGGIL DATA GEOJSON POINT */
+     $.getJSON("fat_jabar.geojson",function (data) {
+      fat_jabar.addData(data);
+      jabar_logo.addData(data);
+      // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    });
+
+     // POINT GEOJSON FAT YOGYA
+     var fat_jogja = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return;
+      },
+    });
+    var Logo = L.icon({
+      iconUrl: "img/FAT.png",
+      iconSize: [15, 15],
+    });
+
+    var jogja_logo = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Logo,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup fat
+      // console.log(layer.feature);
+      return (
+        "Site: " +
+        layer.feature.properties.site_name +
+        "<br>Sub Site: " +
+        layer.feature.properties.sub_site_n +
+        "<br>Capacity HP: " +
+        layer.feature.properties.fat_capaci +
+        "<br>Status : " +
+        layer.feature.properties.status +
+        "<br>FAT Name : " +
+        layer.feature.properties.fat_name +
+        "<br>FAT ID : " +
+        layer.feature.properties.fat_id +
+        "<br>District : " +
+        layer.feature.properties.district +
+        "<br>City : " +
+        layer.feature.properties.city +
+        "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+      );
+    });
+
+     /* 	MEMANGGIL DATA GEOJSON POINT */
+     $.getJSON("fat_jogja.geojson",function (data) {
+      fat_jogja.addData(data);
+      jogja_logo.addData(data);
+      // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    });
+    
+
+    // Menambahkan kontrol default extent
+    var resetControl = L.control.defaultExtent({
+      position: "topleft",
+      maxWidth: 100,
+      maxHeight: 100,
+      backgroundColor: "white",
+      borderColor: "#ccc",
+      borderWeight: 1,
+      text: '<img src="img/rumah.png" alt="Rumah" style="width:22px;height:21px;object-position: center; vertical-align: middle;">',
+      title: "Set View",
+    });
+
+    resetControl.addTo(map);
+
+
+
+
+    var basemapTree = {
+      label: "<b>Basemap</b>",
+      children: [
+        {
+          label: "Google Hybrid",
+          layer: googleHybrid,
+        },
+        {
+          label: "Google Satellite",
+          layer: googleSat,
+        },
+        {
+          label: "Google Street",
+          layer:  googleStreets,
+        },
+        {
+          label: "Topo Map",
+          layer: openTopoMap,
+        },
+      ],
+    };
+
+    var overlaysTree = {
+      label: "<b>FTTH</b>",
+      children: [
+        {
+          label: "<img class= 'OLT' src='img/OLT.png' width='20' height='20'> OLT Seahawks",
+          layer: kab_pt,
+        },
+        { label: "<img class= 'kotak' src='/img/kota.png' width='20' height='20'>OLT Coverage",
+          layer: admin_desa,},
+        { label: "<img class= 'FO' src='img/FO.png' width='20' height='20'>Backbone",
+          layer: Name,},
+        { label: "<img class= 'home' src='img/homepass.png' width='21' height='21'>Site Homepass",layer: icon_homepass,
+        },
+        { label: "<img class= 'FAT' src='img/FAT.png' width='20' height='20'> FAT Active",
+                    
+          children: [{
+            label: "Jakarta",
+          layer: jakarta_logo,
+          },
+          {
+            label: "Banten",
+          layer: banten_logo,
+          },
+          {
+            label: "Jawa Barat",
+          layer: jabar_logo,
+          },
+          {
+            label: "Yogyakarta",
+          layer: jogja_logo,
+          }
+
+          ],
+            },
+        ],
+    };
+
+    L.control.layers.tree(basemapTree, overlaysTree, { collapsed: true,}).addTo(map);
+
+    // // memasukkan variable basemapsnya
+    // var baseLayers = {
+    //   "Google Hybrid": googleHybrid,
+    //   "Google Satelite": googleSat,
+    //   "Google Terrain": googleTerrain,
+    //   "Google Street": googleTerrain,
+    //   "Topo Map": openTopoMap,
+    // };
+
+    // // memasukkan variable layer
+    // var overlays = {
+    //   "<img class= 'OLT' src='img/OLT.png' width='20' height='20'> OLT Seahawks":
+    //     kab_pt,
+    //   "<img class= 'kotak' src='img/kota.png' width='20' height='20'>OLT Coverage":
+    //     admin_desa,
+    //   "<img class= 'FO' src='img/FO.png' width='20' height='20'>Backbone":
+    //     Name,
+    //   "<img class= 'home' src='img/homepass.png' width='21' height='21'>Site Homepass":
+    //     icon_homepass,
+    // };
+
+    L.control
+      .locate({
+        locateOptions: {
+          enableHighAccuracy: true,
+        },
+      })
+      .addTo(map);
+
+    // L.control
+    //   .layers(baseLayers, overlays, {
+    //     collapsed: true,
+    //     position: "topright",
+    //   })
+    //   .addTo(map); //mengaktifkan control layer ke map
+
+    map.attributionControl.setPrefix(false);
+
+    // POPUP INFORMATION
+
+    var popup = document.querySelector(".popup");
+    var dismiss = document.querySelector(".popup__dismiss");
+    var shop = document.querySelector(".popup__shop");
+
+    setTimeout(function () {
+      popup.classList.add("popup--show");
+    }, 500);
+
+    dismiss.addEventListener("click", function () {
+      console.log("kil dismiss");
+      popup.classList.remove("popup--show");
+      popup.classList.add("popup--close");
+    });
+  </script>
+</body>
+
+</html>

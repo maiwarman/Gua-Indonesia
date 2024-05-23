@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fiber Optic Network AMT</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <link rel="stylesheet" href="geocoding/leaflet-search.src.css" />
+  <link rel="stylesheet" href="L.Control.Layers.Tree.css" />
+  <!-- <link rel="stylesheet" href="L.Icon.Pulse.css" /> -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.76.0/dist/L.Control.Locate.min.css" />
+  <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+  <link rel="leaflet.defaultextent.css" />
+  <!-- <link href="style.eb127ecea7b7559c70ac.css" rel="stylesheet" /> -->
+
+  <title>Webgis Djakarta Caver</title>
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      width: 100%;
+      margin: 0px;
+    }
+
+    .OLT {
+      margin-left: 0px;
+      margin-top: 0px;
+      padding-right: 7px;
+      padding-bottom: 4px;
+      object-position: center;
+      vertical-align: middle;
+    }
+
+    .kotak {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    .FO {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    .home {
+      margin-left: 1px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 3px;
+      vertical-align: middle;
+    }
+
+    .FAT {
+      margin-left: 8px;
+      margin-top: auto;
+      padding-bottom: 4px;
+      padding-right: 2px;
+      vertical-align: middle;
+    }
+
+    /*pop-up*/
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .popup {
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      position: fixed;
+      opacity: 0;
+      transition: all 0.2s ease-in;
+    }
+
+    .popup__content {
+      width: 800px;
+      max-width: 100%;
+      height: auto;
+      text-align: center;
+      position: relative;
+      margin: 20vh auto;
+    }
+
+    .popup__image {
+      width: 100%;
+      margin-bottom: 15px;
+      z-index: 99999;
+    }
+
+    .popup__dismiss {
+      position: absolute;
+      top: -30px;
+      right: 0;
+      width: 25px;
+    }
+
+    .popup--show {
+      opacity: 1;
+      z-index: 99999;
+    }
+
+    .popup--close {
+      display: none;
+      transition: all 0.2s ease-out;
+    }
+
+    .search-input {
+      font-family: Courier;
+    }
+
+    .search-input,
+    .leaflet-control-search {
+      max-width: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- pop-up -->
+  <!-- <div class="popup">
+      <div class="popup__content">
+        <img class="popup__image" src="img/asianet.png" alt="Popup Stiker">
+        <img class="popup__dismiss" src="img/btn-close.png" alt="Close">
+     </div>
+  </div> -->
+  <!-- end-pop-up -->
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="geocoding/leaflet-search.src.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+  <script src="L.Icon.Pulse.js"></script>
+  <script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+  <script src="leaflet.defaultextent.js"></script>
+  <script src="L.Control.Layers.Tree.js"></script>
+
+  <!-- Geolocation -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.76.0/dist/L.Control.Locate.min.js" charset="utf-8">
+  </script>
+
+  <script>
+    // Menset leaflet didalam id 'map'
+    var map = L.map("map", {
+      zoomControl: false
+    }).setView(
+      [-7.748114323115157, 110.38749186512172],
+      13
+    );
+
+    L.control.scale({
+      metric: true
+    }).addTo(map);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      // attribution:
+      //   'WebGIS Design © <a href="https://github.com/maiwarman" target=_blank >Mai Warman</a> 2023',
+    }).addTo(map);
+
+    // Buat fungsi untuk menyesuaikan ukuran peta saat ukuran halaman berubah
+    function resizeMap() {
+      var mapContainer = document.getElementById("map");
+      mapContainer.style.width = window.innerWidth + "px";
+      mapContainer.style.height = window.innerHeight + "px";
+      map.invalidateSize();
+    }
+
+    // Panggil fungsi resizeMap() saat halaman dimuat atau ukuran jendela browser berubah
+    window.addEventListener("resize", resizeMap);
+    window.addEventListener("DOMContentLoaded", resizeMap);
+
+    // menset BaseMap kedalam leaflet
+    L.tileLayer(
+      "https://{s}.tile.opentopomap.org/#map=5/-1.164/120.278/{z}/{x}/{y}.png", {
+        maxZoom: 20,
+
+        // attribution: 'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+        // 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: "mapbox/streets-v11",
+        tileSize: 512,
+        zoomOffset: -1,
+      }
+    ).addTo(map);
+
+    //mengaktifkan basemaps ke dalam leaflet
+
+    /* Control Layer Tree */
+
+    var googleStreets = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleHybrid = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleSat = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var googleTerrain = L.tileLayer(
+      "http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      }
+    );
+    var OpenStreetMap = L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 25,
+      }
+    );
+
+    // // line GeoJSON line
+    // var Name = L.geoJson(null, {
+    //   style: function (feature) {
+    //     return {
+    //       color: "green", //memberikan warna garis luar polygon
+    //       weight: 4, // ketebalan garis luar
+    //       opacity: 0.9, // transparansi garis luar
+    //       fillColor: "green", //warna fill
+    //       fillOpacity: 0.7, // transparansi fill
+    //     };
+    //   },
+    //   onEachFeature: function (feature, layer) {
+    //     layer.on({
+    //       mouseover: function (e) {
+    //         var layer = e.target;
+    //         layer.setStyle({
+    //           weight: 2, //ketebalan garis saat mouse diatas feature
+    //           color: "blue", //warna garis saat mouse diatas feature
+    //           opacity: 1, //trasparansi garis saat mouse diatas feature
+    //           fillColor: "blue", //warna tengah saat mouse diatas feature
+    //           fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+    //         });
+    //         layer.bringToFront();
+    //       },
+    //       mouseout: function (e) {
+    //         Name.resetStyle(e.target);
+    //         map.closePopup();
+    //       },
+    //     });
+    //   },
+    // }).bindPopup(function (layer) {
+    //   // popup Coverage
+    //   return (
+    //     "<table style='border-collapse: collapse;'>" +
+    //     "<tr style='background-color: #F7D9C4;'>" +
+    //     "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Name FO</td>" +
+    //     "<td style='border: 1px solid black; padding: 8px;'>" +
+    //     layer.feature.properties.Name +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr style='background-color: #FDEBD0;'>" +
+    //     "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Length FO</td>" +
+    //     "<td style='border: 1px solid black; padding: 8px;'>" +
+    //     layer.feature.properties.Panjang +
+    //     " Meter</td>" +
+    //     "</tr>" +
+    //     "</table>"
+    //   );
+    // });
+    // // memanggil data GeoJSON kedalam layer
+    // $.getJSON("FO.geojson", function (data) {
+    //   Name.addData(data); //mengaktifkan kedalam layer INGATTT
+    // });
+
+    // GEOJSON POINT OLT Outdoor
+    var pulsing = L.icon.pulse({
+      //iconSize: [25, 15],
+      //color: "red",
+      // fillColor: "black",
+      heartbeat: 1.5,
+    });
+
+    var olt_pt = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: pulsing,
+        });
+      },
+    });
+
+    var Icon = L.icon({
+      iconUrl: "img/OLT.png",
+      iconSize: [20, 35],
+      className: "pulsing-icon",
+    });
+
+    var icon_OLT = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: Icon,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup OLT
+      console.log(layer.feature);
+      return (
+        "<table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>" +
+        "<tr style='background-color: #BABBD1;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Site Name</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.OLT_Name +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #BDACBD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Latitude</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Latitude +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #F1D0CD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Longitude</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Longitude +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #BABBD1;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Regional</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Regional +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #F1D0CD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Type</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Type +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #BABBD1;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Location</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Style +
+        "</td>" +
+        "</tr>" +
+        "</table>" +
+        "<br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none;'>Go Location</span></a></div>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    $.getJSON("OLTSeahawks.geojson", function (data) {
+      // olt_pt.addData(data);
+      icon_OLT.addData(data);
+      map.addLayer(olt_pt); //kab_pt ditampilkan ketika halaman dipanggil
+      map.addLayer(icon_OLT);
+    });
+
+    // map.on("overlayadd", (evenhandler) => {
+    //   if (evenhandler.name == "4") {
+    //     map.addLayer(icon_OLT);
+    //     console.log(evenhandler)
+    //   }
+    // });
+
+    // map.on("overlayremove", (evenhandler) => {
+    //   if (evenhandler.name == "4") {
+    //     map.removeLayer(icon_OLT);
+    //     console.log(evenhandler)
+    //   }
+    // });
+
+    // GEOJSON POINT OLT Indoor
+
+    // var kab_pt1 = L.geoJson(null, {
+    //   pointToLayer: function (feature, latlng) {
+    //     return L.marker(latlng, {
+    //       icon: pulsing,
+    //     });
+    //   },
+    // });
+
+    // var Icon2 = L.icon({
+    //   iconUrl: "img/OLT2.png",
+    //   iconSize: [30, 30],
+    //   className: "pulsing-icon",
+    // });
+
+    // var icon2_OLT = L.geoJson(null, {
+    //   pointToLayer: function (feature, latlng) {
+    //     return L.marker(latlng, {
+    //       icon: Icon2,
+    //     });
+    //   },
+    // }).bindPopup(function (layer) {
+    //   // popup OLT
+    //   // console.log(layer.feature);
+    //   return (
+    //     "<table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>" +
+    //     "<tr style='background-color: #BABBD1;'>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Hostname:</strong></td>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+    //     layer.feature.properties.OLT_Name +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr style='background-color: #BDACBD;'>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Latitude:</strong></td>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+    //     layer.feature.properties.Latitude +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr style='background-color: #F1D0CD;'>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Longitude:</strong></td>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+    //     layer.feature.properties.Longitude +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr style='background-color: #BABBD1;'>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Regional:</strong></td>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+    //     layer.feature.properties.Regional +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr style='background-color: #F1D0CD;'>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Type:</strong></td>" +
+    //     "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+    //     layer.feature.properties.Type +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "</table>" +
+    //     "<br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+    //     layer.feature.geometry.coordinates[1] +
+    //     "," +
+    //     layer.feature.geometry.coordinates[0] +
+    //     "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none;'>Go Location</span></a></div>"
+    //   );
+    // });
+
+    // /* 	MEMANGGIL DATA GEOJSON POINT */
+    // $.getJSON("OLTIndoor.geojson", function (data) {
+    //   kab_pt1.addData(data);
+    //   icon2_OLT.addData(data);
+    //   // map.addLayer(kab_pt1); //kab_pt ditampilkan ketika halaman dipanggil
+    //   // map.addLayer(icon2_OLT);
+    // });
+
+    // map.on("overlayadd", (evenhandler) => {
+    //   if (evenhandler.name == "5") {
+    //     map.addLayer(icon2_OLT);
+    //     // console.log(evenhandler)
+    //   }
+    // });
+
+    // map.on("overlayremove", (evenhandler) => {
+    //   if (evenhandler.name == "5") {
+    //     map.removeLayer(icon2_OLT);
+    //     // console.log(evenhandler)
+    //   }
+    // });
+
+    // GEOJSON POINT Join Closure
+
+    var clousure = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: pulsing,
+        });
+      },
+    });
+
+    var join = L.icon({
+      iconUrl: "img/Closure.png",
+      iconSize: [15, 15],
+      className: "pulsing-icon",
+    });
+
+    var join2 = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: join,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup OLT
+      // console.log(layer.feature);
+      return (
+        "<table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>" +
+        "<tr style='background-color: #BABBD1;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Name</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Name +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #BDACBD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Capacity</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Capacity +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #F1D0CD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Type:</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Type +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #BDACBD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Latitude:</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Lat +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #F1D0CD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Longitude:</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Long +
+        "</td>" +
+        "</tr>" +
+        "</table>" +
+        "<br><div style='text-align:center;'>" +
+        "<a href='https://teams.microsoft.com/_?culture=id-id&country=id#/FileBrowserTabApp/Database%20Planning%20and%20Design?threadId=19:2997524983ca499593253c9cbe398082@thread.tacv2&ctx=channel' download='your_filename.extension' target='_blank'>" +
+        // Menambahkan target="_blank"
+        "<span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none; border: none;'>Download Management Core</span>" +
+        "</a>" +
+        "</div>" +
+        "<br><div style='text-align:center;'>" +
+        "<a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'>" +
+        "<span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none; border: none;'>Go Location</span>" +
+        "</a>" +
+        "</div>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    $.getJSON("Join Closure.geojson", function (data) {
+      clousure.addData(data);
+      join2.addData(data);
+    });
+
+    // map.on("overlayadd", (evenhandler) => {
+    //   if (evenhandler.name == "6") {
+    //     map.addLayer(join2);
+    //     // console.log(evenhandler)
+    //   }
+    // });
+
+    // map.on("overlayremove", (evenhandler) => {
+    //   if (evenhandler.name == "6") {
+    //     map.removeLayer(join2);
+    //     // console.log(evenhandler)
+    //   }
+    // });
+
+    // GEOJSON POINT FDT
+
+    var fdt = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: pulsing,
+        });
+      },
+    });
+
+    var fdt2 = L.icon({
+      iconUrl: "img/FDT.png",
+      iconSize: [20, 20],
+      className: "pulsing",
+    });
+
+    var fdt3 = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {
+          icon: fdt2,
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup OLT
+      // console.log(layer.feature);
+      return (
+        "<table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>" +
+        "<tr style='background-color: #BABBD1;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Name</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Name +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #BDACBD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Capacity</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Capacity +
+        "</td>" +
+        "</tr>" +
+        // "<tr style='background-color: #F1D0CD;'>" +
+        // "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Type:</strong></td>" +
+        // "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        // layer.feature.properties.Type +
+        // "</td>" +
+        // "</tr>" +
+        "<tr style='background-color: #BDACBD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Latitude:</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Lat +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #F1D0CD;'>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'><strong>Longitude:</strong></td>" +
+        "<td style='border: 0.4px solid black; border-color: grey; padding: 8px;'>" +
+        layer.feature.properties.Long +
+        "</td>" +
+        "</tr>" +
+        "</table>" +
+        // "<br><div style='text-align:center;'>" +
+        // "<a href='https://teams.microsoft.com/_?culture=id-id&country=id#/FileBrowserTabApp/Database%20Planning%20and%20Design?threadId=19:2997524983ca499593253c9cbe398082@thread.tacv2&ctx=channel' download='your_filename.extension' target='_blank'>" + // Menambahkan target="_blank"
+        // "<span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none; border: none;'>Download Management Core</span>" +
+        // "</a>" +
+        // "</div>" +
+
+        "<br><div style='text-align:center;'>" +
+        "<a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+        layer.feature.geometry.coordinates[1] +
+        "," +
+        layer.feature.geometry.coordinates[0] +
+        "&travelmode=driving'>" +
+        "<span style='background-color: #007bff; color: #fff; padding: 8px 20px; border-radius: 4px; text-decoration: none; border: none;'>Go Location</span>" +
+        "</a>" +
+        "</div>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    $.getJSON("FDT.geojson", function (data) {
+      fdt.addData(data);
+      fdt3.addData(data);
+    });
+
+    // map.on("overlayadd", (evenhandler) => {
+    //   if (evenhandler.name == "7") {
+    //     map.addLayer(fdt3);
+    //     // console.log(evenhandler)
+    //   }
+    // });
+
+    // map.on("overlayremove", (evenhandler) => {
+    //   if (evenhandler.name == "7") {
+    //     map.removeLayer(fdt3);
+    //     // console.log(evenhandler)
+    //   }
+    // });
+
+    // // POINT GEOJSON HOMEPASS
+    // var home_pt = L.geoJson(null, {
+    //   pointToLayer: function (feature, latlng) {
+    //     return;
+    //   },
+    // });
+    // var Ico = L.icon({
+    //   iconUrl: "img/homepass.png",
+    //   iconSize: [20, 20],
+    // });
+
+    // var icon_homepass = L.geoJson(null, {
+    //   pointToLayer: function (feature, latlng) {
+    //     return L.marker(latlng, {
+    //       icon: Ico,
+    //     });
+    //   },
+    // }).bindPopup(function (layer) {
+    //   // popup homepass
+    //   // console.log(layer.feature);
+    //   return (
+    //     "Site: " +
+    //     layer.feature.properties.Cluster_Ap +
+    //     "<br>Homepass : " +
+    //     layer.feature.properties.Homepass_E +
+    //     "<br>Type Site : " +
+    //     layer.feature.properties.Landed_HRB +
+    //     "<br>Project HP : " +
+    //     layer.feature.properties.Project_Fu +
+    //     "<br>Village : " +
+    //     layer.feature.properties.Desa_Kelur +
+    //     "<br>Region : " +
+    //     layer.feature.properties.Kabupaten_ +
+    //     "<br><br><div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+    //     layer.feature.geometry.coordinates[1] +
+    //     "," +
+    //     layer.feature.geometry.coordinates[0] +
+    //     "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 3px 5px; border-radius: 3px;'>Menuju Lokasi</span></a></div>"
+    //   );
+    // });
+
+    /* 	MEMANGGIL DATA GEOJSON POINT */
+    // $.getJSON("homepass.geojson", function (data) {
+    //   home_pt.addData(data);
+    //   icon_homepass.addData(data);
+    //   map.addLayer(home_pt); //kab_pt ditampilkan ketika halaman dipanggil
+    // });
+
+    // map.on("overlayadd", (evenhandler) => {
+    //   if (evenhandler.name == "7") {
+    //     map.addLayer(icon_homepass);
+    //   }
+    // });
+
+    // map.on("overlayremove", (evenhandler) => {
+    //   if (evenhandler.name == "7") {
+    //     map.removeLayer(icon_homepass);
+    //   }
+    // });
+
+    // line GeoJSON line Backbone Existing
+    map.createPane("line_backbone");
+    map.getPane("line_backbone").style.zIndex = 450;
+    var Name = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "blue", //memberikan warna garis luar polygon
+          weight: 2, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: "blue", //warna fill
+          fillOpacity: 0.7, // transparansi fill
+          pane: "line_backbone",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "cyan", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            Name.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return (
+        "<table style='border-collapse: collapse;'>" +
+        "<tr style='background-color: #F7D9C4;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>FO Capacity</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Capacity +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #FDEBD0;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Segment</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Segment +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #FDEBD0;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Length</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Length + " Km" +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #FDEBD0;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Project Name</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Project +
+        "</td>" +
+        "</tr>" +
+        "</table>"
+      );
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("Backbone_Eksisting.geojson", function (data) {
+      Name.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // line GeoJSON line Backbone On Going
+    map.createPane("line_backbone_on");
+    map.getPane("line_backbone_on").style.zIndex = 450;
+    var Back = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "red", //memberikan warna garis luar polygon
+          weight: 2, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: "red", //warna fill
+          fillOpacity: 0.7, // transparansi fill
+          pane: "line_backbone_on",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "cyan", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            Back.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return (
+        "<table style='border-collapse: collapse;'>" +
+        "<tr style='background-color: #F7D9C4;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>FO Capacity</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Capacity +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #FDEBD0;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Segment</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Segment +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #FDEBD0;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Length</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Length + " Km" +
+        "</td>" +
+        "</tr>" +
+        "<tr style='background-color: #FDEBD0;'>" +
+        "<td style='border: 1px solid black; padding: 8px; font-weight: bold;'>Project Name</td>" +
+        "<td style='border: 1px solid black; padding: 8px;'>" +
+        layer.feature.properties.Project +
+        "</td>" +
+        "</tr>" +
+        "</table>"
+      );
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("Backbone_On_Going.geojson", function (data) {
+      Back.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+
+    //Line Kabel Distribution Existing
+    map.createPane("line_distribution");
+    map.getPane("line_distribution").style.zIndex = 450;
+    var distribution = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "#008080", //memberikan warna garis luar polygon
+          weight: 2, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: "#008080", //warna fill
+          fillOpacity: 0.7, // transparansi fill
+          pane: "line_distribution",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "cyan", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            distribution.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup homepass
+      // console.log(layer.feature);
+      return (
+        "<table style='border-collapse: collapse; width: 100%;'>" +
+        "<tr>" +
+        "<td style='background-color: #E8C3A8; padding: 5px; border: 1px solid #000;'>FO Capacity</td>" +
+        "<td style='background-color: #F4E4D9; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Capacity +
+        "</td>" +
+        "</tr>" +
+        "<tr>" +
+        "<td style='background-color: #D4A49E; padding: 5px; border: 1px solid #000;'>Segment</td>" +
+        "<td style='background-color: #E4C7BE; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Segment +
+        "</td>" +
+        "</tr>" +
+        "<td style='background-color: #D4A49E; padding: 5px; border: 1px solid #000;'>Length</td>" +
+        "<td style='background-color: #E4C7BE; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Length + " Km" +
+        "</td>" +
+        "</tr>" +
+        "<td style='background-color: #A98B87; padding: 5px; border: 1px solid #000;'>Project Name</td>" +
+        "<td style='background-color: #C2B3AD; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Project +
+        "</td>" +
+        "</table>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON LINE */
+    $.getJSON("Distribution_Existing.geojson", function (data) {
+      distribution.addData(data);
+      // kabel_logo.addData(data);
+      // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    });
+
+    //Line Kabel Distribution On Going
+    map.createPane("line_distribusi");
+    map.getPane("line_distribusi").style.zIndex = 450;
+    var distribusi_on = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "black", //memberikan warna garis luar polygon
+          weight: 2, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: "black", //warna fill
+          fillOpacity: 0.7, // transparansi fill
+          pane: "line_distribusi",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "cyan", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "cyan", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            distribusi_on.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup homepass
+      // console.log(layer.feature);
+      return (
+        "<table style='border-collapse: collapse; width: 100%;'>" +
+        "<tr>" +
+        "<td style='background-color: #E8C3A8; padding: 5px; border: 1px solid #000;'>FO Capacity</td>" +
+        "<td style='background-color: #F4E4D9; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Capacity +
+        "</td>" +
+        "</tr>" +
+        "<tr>" +
+        "<td style='background-color: #D4A49E; padding: 5px; border: 1px solid #000;'>Segment</td>" +
+        "<td style='background-color: #E4C7BE; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Segment +
+        "</td>" +
+        "</tr>" +
+        "<td style='background-color: #D4A49E; padding: 5px; border: 1px solid #000;'>Length</td>" +
+        "<td style='background-color: #E4C7BE; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Length + " Km" +
+        "</td>" +
+        "</tr>" +
+        "<td style='background-color: #A98B87; padding: 5px; border: 1px solid #000;'>Project Name</td>" +
+        "<td style='background-color: #C2B3AD; padding: 5px; border: 1px solid #000;'>" +
+        layer.feature.properties.Project +
+        "</td>" +
+        "</table>"
+      );
+    });
+
+    /* 	MEMANGGIL DATA GEOJSON LINE */
+    $.getJSON("Distribusi On Going.geojson", function (data) {
+      distribusi_on.addData(data);
+      // kabel_logo.addData(data);
+      // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    });
+    // Line GEOJSON 96 Core
+    // var kabel_96 = L.geoJson(null, {
+    //   style: function (feature) {
+    //     return {
+    //       color: "blue", //memberikan warna garis luar polygon
+    //       weight: 4, // ketebalan garis luar
+    //       opacity: 0.9, // transparansi garis luar
+    //       fillColor: "blue", //warna fill
+    //       fillOpacity: 0.7, // transparansi fill
+    //     };
+    //   },
+    //   onEachFeature: function (feature, layer) {
+    //     layer.on({
+    //       mouseover: function (e) {
+    //         var layer = e.target;
+    //         layer.setStyle({
+    //           weight: 2, //ketebalan garis saat mouse diatas feature
+    //           color: "yellow", //warna garis saat mouse diatas feature
+    //           opacity: 1, //trasparansi garis saat mouse diatas feature
+    //           fillColor: "yellow", //warna tengah saat mouse diatas feature
+    //           fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+    //         });
+    //         layer.bringToFront();
+    //       },
+    //       mouseout: function (e) {
+    //         kabel_96.resetStyle(e.target);
+    //         // map.closePopup();
+    //       },
+    //     });
+    //   },
+    // }).bindPopup(function (layer) {
+    //   // popup homepass
+    //   // console.log(layer.feature);
+    //   return (
+    //     "<table style='border-collapse: collapse; width: 100%;'>" +
+    //     "<tr>" +
+    //     "<td style='background-color: #E8C3A8; padding: 5px; border: 1px solid #000;'>Cable</td>" +
+    //     "<td style='background-color: #F4E4D9; padding: 5px; border: 1px solid #000;'>" +
+    //     layer.feature.properties.Cable +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr>" +
+    //     "<td style='background-color: #D4A49E; padding: 5px; border: 1px solid #000;'>Type</td>" +
+    //     "<td style='background-color: #E4C7BE; padding: 5px; border: 1px solid #000;'>" +
+    //     layer.feature.properties.Type +
+    //     "</td>" +
+    //     "</tr>" +
+    //     // "<tr><td>Length</td><td>" + layer.feature.properties.Length + "</td></tr>" +
+    //     "<tr>" +
+    //     "<td style='background-color: #A98B87; padding: 5px; border: 1px solid #000;'>Location</td>" +
+    //     "<td style='background-color: #C2B3AD; padding: 5px; border: 1px solid #000;'>" +
+    //     layer.feature.properties.Location +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "<tr>" +
+    //     "<td style='background-color: #8F7773; padding: 5px; border: 1px solid #000;'>Aset</td>" +
+    //     "<td style='background-color: #AB9F9B; padding: 5px; border: 1px solid #000;'>" +
+    //     layer.feature.properties.Aset +
+    //     "</td>" +
+    //     "</tr>" +
+    //     "</table>"
+    //   );
+    // });
+
+    // /* 	MEMANGGIL DATA GEOJSON LINE */
+    // $.getJSON("Kabel 96 Core.geojson", function (data) {
+    //   kabel_96.addData(data);
+    //   // kabel_logo.addData(data);
+    //   // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    // });
+
+    // polygon GeoJSON Site_Sleman
+
+    map.createPane("admin_desa");
+    map.getPane("admin_desa").style.zIndex = 400;
+    var admin_desa = L.geoJson(null, {
+      style: function (feature) {
+        return {
+          color: "grey", //memberikan warna garis luar polygon
+          weight: 1, // ketebalan garis luar
+          opacity: 0.9, // transparansi garis luar
+          fillColor: feature.properties.Color, //warna fill
+          fillOpacity: 1, // transparansi fill
+          pane: "admin_desa",
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            var layer = e.target;
+            layer.setStyle({
+              weight: 2, //ketebalan garis saat mouse diatas feature
+              color: "black", //warna garis saat mouse diatas feature
+              opacity: 1, //trasparansi garis saat mouse diatas feature
+              fillColor: "yellow", //warna tengah saat mouse diatas feature
+              fillOpacity: 0.5, //trasparansi warna tengah saat mouse diatas feature
+            });
+            layer.bringToFront();
+          },
+          mouseout: function (e) {
+            admin_desa.resetStyle(e.target);
+            // map.closePopup();
+          },
+        });
+      },
+    }).bindPopup(function (layer) {
+      // popup Coverage
+      return `<table style="border-collapse: collapse; width: 90%; margin: 7px auto; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 0.5px solid #000000;">
+    <tr style="background-color: #cce5ff;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Site/Cluster Name</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.Name}</td>
+    </tr>
+    <tr style="background-color: #e0e0e0;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Type</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.Type}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Homepass</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.Homepass}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Address</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.Address}</td>
+    </tr>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 5px; border: 0.5px solid #000000;">Tenant</th>
+      <td style="padding: 5px; border: 0.5px solid #000000;">${layer.feature.properties.Tenant}</td>
+    </tr>
+  </table>
+  <a href="https://ltvpl.sharepoint.com/:f:/s/Planning/EkB1NlAIx5lIiJVbuIOJepYBnrnePOWiQfb-6iB_mUMh0w?e=dtNna0" style="text-decoration: none;" target="_blank">
+    <button style="background-color: blue; color: white; padding: 10px; margin: 10px auto; display: block; border: none; border-radius: 5px; cursor: pointer;">
+      Download APD
+    </button>
+  </table>
+  <a href="${layer.feature.properties.URL}" style="text-decoration: none;" target="_blank">
+    <button style="background-color: blue; color: white; padding: 10px; margin: 10px auto; display: block; border: none; border-radius: 5px; cursor: pointer;">
+      Download ABD
+    </button>
+
+  </a>
+
+  <style>
+    button:hover {
+      background-color: blue;
+    }
+  </style>`;
+    });
+    // memanggil data GeoJSON kedalam layer
+    $.getJSON("Site_Sleman.geojson", function (data) {
+      admin_desa.addData(data); //mengaktifkan kedalam layer INGATTT
+    });
+
+    // // POINT GEOJSON FAT YOGYA
+    // var fat_jogja = L.geoJson(null, {
+    //   pointToLayer: function (feature, latlng) {
+    //     return;
+    //   },
+    // });
+    // var Logo = L.icon({
+    //   iconUrl: "img/FAT.png",
+    //   iconSize: [15, 15],
+    // });
+
+    // var jogja_logo = L.geoJson(null, {
+    //   pointToLayer: function (feature, latlng) {
+    //     return L.marker(latlng, {
+    //       icon: Logo,
+    //     });
+    //   },
+    // }).bindPopup(function (layer) {
+    //   // popup fat
+    //   // console.log(layer.feature);
+    //   return (
+    //     "<table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>" +
+    //     "<table style='border-collapse: collapse; border: 1px solid grey;'>" +
+    //     "<tr style='background-color: #FFFF99; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>Site</td><td style='background-color: #FFFF99;'>" +
+    //     layer.feature.properties.site_name +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #CCEEC7; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>Sub Site</td><td style='background-color: #CCEEC7;'>" +
+    //     layer.feature.properties.sub_site_n +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #FFFF99; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>Capacity HP</td><td style='background-color: #FFFF99;'>" +
+    //     layer.feature.properties.fat_capaci +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #CCEEC7; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>Status</td><td style='background-color: #CCEEC7;'>" +
+    //     layer.feature.properties.status +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #FFFF99; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>FAT Name </td><td style='background-color: #FFFF99;'>" +
+    //     layer.feature.properties.fat_name +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #CCEEC7; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>FAT ID </td><td style='background-color: #CCEEC7;'>" +
+    //     layer.feature.properties.fat_id +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #FFFF99; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>District </td><td style='background-color: #FFFF99;'>" +
+    //     layer.feature.properties.district +
+    //     "</td></tr>" +
+    //     "<tr style='background-color: #CCEEC7; border-bottom: 1px solid grey;'><td style='border-right: 1px solid grey;'>City </td><td style='background-color: #CCEEC7;'>" +
+    //     layer.feature.properties.city +
+    //     "</td></tr>" +
+    //     "</table><br>" +
+    //     "<div style='text-align:center;'><a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination=" +
+    //     layer.feature.geometry.coordinates[1] +
+    //     "," +
+    //     layer.feature.geometry.coordinates[0] +
+    //     "&travelmode=driving'><span style='background-color: #007bff; color: #fff; padding: 8px 10px; border-radius: 3px;'>Go Location</span></a></div>"
+    //   );
+    // });
+
+    // /* 	MEMANGGIL DATA GEOJSON POINT */
+    // $.getJSON("fat_jogja.geojson", function (data) {
+    //   fat_jogja.addData(data);
+    //   jogja_logo.addData(data);
+    //   // map.addLayer(banten_logo); //banten_logo ditampilkan ketika halaman dipanggil
+    // });
+
+    // function addJogjaLayer() {
+    //   map.eachLayer(function (layer) {
+    //     if (layer.options && layer.options.name === "jogja") {
+    //       layer.addTo(map);
+    //     }
+    //   });
+    // }
+
+     // LAYER CONTROL
+
+    var basemapTree = {
+      label: "<b>Basemap</b>",
+      children: [{
+          label: "Google Hybrid",
+          layer: googleHybrid,
+        },
+        {
+          label: "Google Satellite",
+          layer: googleSat,
+        },
+        {
+          label: "Google Street",
+          layer: googleStreets,
+        },
+        {
+          label: "Google Terrain",
+          layer: googleTerrain,
+        },
+        {
+          label: "Open Street Map",
+          layer: OpenStreetMap,
+        },
+      ],
+    };
+
+    var overlaysTree = {
+      label: "<b>Network Element</b>",
+      children: [{
+          label: "<b><img class= 'OLT' src='img/OLT.png' width='15' height='25'> OLT</b>",
+          layer: icon_OLT,
+        },
+        {
+          label: "<b><img class= 'kotak' src='img/kota.png' width='20' height='20'> Cluster</b>",
+          layer: admin_desa,
+        },
+        {
+          label: "<b><img class= 'FAT' src='img/FAT.png' width='20' height='20'>  FO Route</b>",
+
+          children: [{
+              label: "Backbone",
+              children: [{
+                  label: "Existing",
+                  layer: Name,
+                },
+                {
+                  label: "On Going",
+                  layer: Back,
+                }
+              ]
+
+            },
+            {
+              label: "Distribution",
+              children: [{
+                  label: "Existing",
+                  layer: distribution,
+                },
+                {
+                  label: "On Going",
+                  layer: distribusi_on,
+                }
+              ]
+            },
+          ],
+        },
+        {
+          label: "<b><img class= 'OLT' src='img/FDT.png' width='20' height='20'>  FDT</b>",
+          layer: fdt3,
+        },
+        {
+          label: "<b><img class= 'OLT' src='img/Closure.png' width='18' height='18'> Join Closure</b>",
+          layer: join2,
+        },
+      ],
+    };
+
+   
+    L.control.layers
+      .tree(basemapTree, overlaysTree, {
+        collapsed: false,
+        position: "topleft",
+      })
+      .addTo(map);
+
+    // // memasukkan variable basemapsnya
+    // var baseLayers = {
+    //   "Google Hybrid": googleHybrid,
+    //   "Google Satelite": googleSat,
+    //   "Google Terrain": googleTerrain,
+    //   "Google Street": googleTerrain,
+    //   "Topo Map": openTopoMap,
+    // };
+
+    // // memasukkan variable layer
+    // var overlays = {
+    //   "<img class= 'OLT' src='img/OLT.png' width='20' height='20'> OLT Seahawks":
+    //     kab_pt,
+    //   "<img class= 'kotak' src='img/kota.png' width='20' height='20'>OLT Coverage":
+    //     admin_desa,
+    //   "<img class= 'FO' src='img/FO.png' width='20' height='20'>Backbone":
+    //     Name,
+    //   "<img class= 'home' src='img/homepass.png' width='21' height='21'>Site Homepass":
+    //     icon_homepass,
+    // };
+
+    // L.control
+    //   .layers(baseLayers, overlays, {
+    //     collapsed: true,
+    //     position: "topright",
+    //   })
+    //   .addTo(map); //mengaktifkan control layer ke map
+
+    map.attributionControl.setPrefix(false);
+
+    // Menambahkan kontrol default extent
+    var resetControl = L.control.defaultExtent({
+      position: "topright",
+      maxWidth: 100,
+      maxHeight: 100,
+      backgroundColor: "white",
+      borderColor: "#ccc",
+      borderWeight: 1,
+      text: '<img src="img/rumah.png" alt="Rumah" style="width:22px;height:21px;object-position: center; vertical-align: middle;">',
+      title: "Set View",
+    });
+
+    resetControl.addTo(map);
+
+    L.control
+      .locate({
+        position: "topright",
+        locateOptions: {
+          enableHighAccuracy: true,
+        },
+      })
+      .addTo(map);
+
+    //Geocoding
+    map.addControl(
+      new L.Control.Search({
+        url: "https://nominatim.openstreetmap.org/search?format=json&q={s}",
+        jsonpParam: "json_callback",
+        propertyName: "display_name",
+        propertyLoc: ["lat", "lon"],
+        marker: L.circleMarker([0, 0], {
+          radius: 30
+        }),
+        autoCollapse: true,
+        autoType: false,
+        minLength: 2,
+      })
+    );
+
+    let options = {
+      position: "topright", // Position to show the control. Values: 'topright', 'topleft', 'bottomright', 'bottomleft'
+      unit: "kilometres", // Default unit the distances are displayed in. Values: 'kilometres', 'landmiles', 'nauticalmiles'
+      useSubunits: true, // Use subunits (metres/feet) in tooltips if distances are less than 1 kilometre/landmile
+      clearMeasurementsOnStop: true, // Clear all measurements when Measure Control is switched off
+      showBearings: true, // Whether bearings are displayed within the tooltips
+      bearingTextIn: "In", // language dependend label for inbound bearings
+      bearingTextOut: "Out", // language dependend label for outbound bearings
+      tooltipTextFinish: "Click to <b>finish line</b><br>",
+      tooltipTextDelete: "Press SHIFT-key and click to <b>delete point</b>",
+      tooltipTextMove: "Click and drag to <b>move point</b><br>",
+      tooltipTextResume: "<br>Press CTRL-key and click to <b>resume line</b>",
+      tooltipTextAdd: "Press CTRL-key and click to <b>add point</b>",
+      // language dependend labels for point's tooltips
+      measureControlTitleOn: "Turn on PolylineMeasure", // Title for the Measure Control going to be switched on
+      measureControlTitleOff: "Turn off PolylineMeasure", // Title for the Measure Control going to be switched off
+      measureControlLabel: "&#8614;", // Label of the Measure Control (Unicode symbols are possible)
+      measureControlClasses: [], // Classes to apply to the Measure Control
+      showClearControl: true, // Show a control to clear all the measurements
+      clearControlTitle: "Clear Measurements", // Title text to show on the Clear Control
+      clearControlLabel: "&times", // Label of the Clear Control (Unicode symbols are possible)
+      clearControlClasses: [], // Classes to apply to Clear Control
+      showUnitControl: true, // Show a control to change the units of measurements
+      unitControlUnits: ["kilometres", "landmiles", "nauticalmiles"],
+      // measurement units being cycled through by using the Unit Control
+      unitControlTitle: {
+        // Title texts to show on the Unit Control
+        text: "Change Units",
+        kilometres: "kilometres",
+        landmiles: "land miles",
+        nauticalmiles: "nautical miles",
+      },
+      unitControlLabel: {
+        // Unit symbols to show in the Unit Control and measurement labels
+        metres: "m",
+        kilometres: "km",
+        feet: "ft",
+        landmiles: "mi",
+        nauticalmiles: "nm",
+      },
+      unitControlClasses: [], // Classes to apply to the Unit Control
+      tempLine: {
+        // Styling settings for the temporary dashed line
+        color: "#00f", // Dashed line color
+        weight: 2, // Dashed line weight
+      },
+      fixedLine: {
+        // Styling for the solid line
+        color: "red", // Solid line color
+        weight: 2, // Solid line weight
+      },
+      startCircle: {
+        // Style settings for circle marker indicating the starting point of the polyline
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#0f0", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+      intermedCircle: {
+        // Style settings for all circle markers between startCircle and endCircle
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#ff0", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+      currentCircle: {
+        // Style settings for circle marker indicating the latest point of the polyline during drawing a line
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#f0f", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+      endCircle: {
+        // Style settings for circle marker indicating the last point of the polyline
+        color: "#000", // Color of the border of the circle
+        weight: 1, // Weight of the circle
+        fillColor: "#f00", // Fill color of the circle
+        fillOpacity: 1, // Fill opacity of the circle
+        radius: 3, // Radius of the circle
+      },
+    };
+    let polylineMeasure = L.control.polylineMeasure(options);
+    polylineMeasure.addTo(map);
+
+    // POPUP INFORMATION
+    var popup = document.querySelector(".popup");
+    var dismiss = document.querySelector(".popup__dismiss");
+    var shop = document.querySelector(".popup__shop");
+
+    setTimeout(function () {
+      popup.classList.add("popup--show");
+    }, 500);
+
+    dismiss.addEventListener("click", function () {
+      console.log("kil dismiss");
+      popup.classList.remove("popup--show");
+      popup.classList.add("popup--close");
+    });
+  </script>
+
+  <!-- POP UP -->
+  <script>
+    const toggleSwitch = document.querySelector(
+      '.theme-switch input[type="checkbox"]'
+    );
+
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    }
+
+    toggleSwitch.addEventListener("change", switchTheme, false);
+
+    function switchTheme(e) {
+      if (e.target.checked) {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("theme", "dark"); //add this
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light"); //add this
+      }
+    }
+    const currentTheme = localStorage.getItem("theme") ?
+      localStorage.getItem("theme") :
+      null;
+
+    if (currentTheme) {
+      document.documentElement.setAttribute("data-theme", currentTheme);
+
+      if (currentTheme === "dark") {
+        toggleSwitch.checked = true;
+      }
+    }
+  </script>
+</body>
+
+</html>
