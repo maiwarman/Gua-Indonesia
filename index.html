@@ -120,7 +120,7 @@
     }
 
     #map>div.leaflet-control-container>div.leaflet-top.leaflet-left>div>a.search-button {
-      background-color: #fcfc01;
+      background-color: #ffff00;
       border-color: #ff0000;
     }
 
@@ -181,18 +181,24 @@
     .leaflet-control-search {
       max-width: 150px;
     }
+
+    div.leaflet-pulsing-icon {
+      background-position: center;
+      background-image: url("img/cave.png") !important;
+      background-size: cover;
+    }
   </style>
 </head>
 
 <body>
 
   <!-- pop-up -->
-  <div class="popup">
+  <!-- <div class="popup">
     <div class="popup__content">
       <img class="popup__image" src="img/basegis.png" alt="Popup Stiker">
       <img class="popup__dismiss" src="img/btn-close.png" alt="Close">
     </div>
-  </div>
+  </div> -->
   <!-- end-pop-up -->
 
   <div id="map"></div>
@@ -317,35 +323,35 @@
     );
 
 
-    // Definisi ikon gua
-var guaIcon = L.icon({
-  iconUrl: "img/cave.png",
-  iconSize: [20, 20],
-  className: "cave"
-});
+    // ini khusus untuk codingan GUA
 
-// Definisi ikon pulsasi
-var pulsingIcon = L.icon.pulse({
-  iconSize: [20, 20],
-  color: "red",
-  fillColor: "red",
-  heartbeat: 1
-});
+    var pulsingIcon = L.icon.pulse({
+      iconSize: [20, 20],
+      color: "red",
+      fillColor: "red",
+      heartbeat: 1,
+    });
 
-// Layer GeoJSON untuk marker gua dan ikon pulsasi
-var guaAndPulsingLayer = L.geoJson(null, {
-  pointToLayer: function (feature, latlng) {
-    var markerOptions = {
-      icon: guaIcon // Menggunakan ikon gua
-    };
-    if (feature.properties && feature.properties.pulsing) {
-      markerOptions.icon = pulsingIcon; // Menggunakan ikon pulsasi jika properti 'pulsing' tersedia
-    }
-    return L.marker(latlng, markerOptions);
-  },
-  onEachFeature: function (feature, layer) {
-    layer.bindPopup(function (layer) {
-      return `
+    var guaIcon = L.icon({
+      iconUrl: "img/cave.png",
+      iconSize: [20, 20],
+      className: "cave",
+    });
+
+    // Layer GeoJSON untuk marker gua dan ikon pulsasi
+    var guaAndPulsingLayer = L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        var markerOptions = {
+          icon: pulsingIcon, // Menggunakan ikon gua
+        };
+        if (feature.properties && feature.properties.pulsing) {
+          markerOptions.icon = pulsingIcon; // Menggunakan ikon pulsasi jika properti 'pulsing' tersedia
+        }
+        return L.marker(latlng, markerOptions);
+      },
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup(function (layer) {
+          return `
         <table style='border-collapse: collapse; border-radius: 10px; overflow: hidden;'>
           <tr style="background-color: #FF0000;">
             <td style="border: 0.4px solid black; border-color: grey; padding: 8px; color: white;"><strong>Nama Gua</strong></td>
@@ -375,34 +381,34 @@ var guaAndPulsingLayer = L.geoJson(null, {
           </a>
         </div>
       `;
+        });
+      },
     });
-  }
-});
 
-// Marker Cluster Group untuk mengelompokkan marker gua dan pulsasi
-var markers = L.markerClusterGroup();
+    // Marker Cluster Group untuk mengelompokkan marker gua dan pulsasi
+    var markers = L.markerClusterGroup();
 
-// Memuat data GeoJSON dari file "gua.geojson"
-$.getJSON("gua.geojson", function (data) {
-  guaAndPulsingLayer.addData(data);
-  markers.addLayer(guaAndPulsingLayer);
-  map.addLayer(markers);
-});
+    // Memuat data GeoJSON dari file "gua.geojson"
+    $.getJSON("gua.geojson", function (data) {
+      guaAndPulsingLayer.addData(data);
+      markers.addLayer(guaAndPulsingLayer);
+      map.addLayer(markers);
+    });
 
-// Event listener untuk overlayadd dan overlayremove
-map.on('overlayadd', function (event) {
-  if (event.name === 'icon_gua') {
-    map.addLayer(markers);
-    console.log(event.name === 'icon_gua'); // seharusnya mengembalikan true
-  }
-});
+    // Event listener untuk overlayadd dan overlayremove
+    map.on("overlayadd", function (event) {
+      if (event.name === "icon_gua") {
+        map.addLayer(markers);
+        console.log(event.name === "icon_gua"); // seharusnya mengembalikan true
+      }
+    });
 
-map.on('overlayremove', function (event) {
-  if (event.name === 'icon_gua') {
-    map.removeLayer(markers);
-    console.log(event.name === 'icon_gua'); // seharusnya mengembalikan true
-  }
-});
+    map.on("overlayremove", function (event) {
+      if (event.name === "icon_gua") {
+        map.removeLayer(markers);
+        console.log(event.name === "icon_gua"); // seharusnya mengembalikan true
+      }
+    });
 
 
 
