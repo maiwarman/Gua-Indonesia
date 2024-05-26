@@ -226,24 +226,25 @@
   <script src="https://sikk.magelangkab.go.id/assets/homepage//assets/js/antpath/leaflet-ant-path.es6.js"></script>
 
   <script>
-    // Menset leaflet leaflet didalam id 'map'
+    // Inisialisasi peta di dalam elemen dengan id 'map'
     var map = L.map("map", {
       zoomControl: false,
     }).setView([-4.3796958349529405, 120.00423277007731], 5);
 
+    // Menambahkan kontrol skala dengan satuan metrik
     L.control
       .scale({
         metric: true,
       })
       .addTo(map);
 
+    // Menambahkan layer OpenStreetMap
     var OpenStreetMap = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution:
-        'WebGIS Design © <a href="https://www.youtube.com/channel/UCw1KKeYlrcgVf4-PGDyvG2Q" target=_blank >Mai Warman</a> 2024',
+      attribution: 'WebGIS Design © <a href="https://www.youtube.com/channel/UCw1KKeYlrcgVf4-PGDyvG2Q" target=_blank >Mai Warman</a> 2024',
     }).addTo(map);
 
-    // Tambahkan logo di pojok kanan bawah
+    // Menambahkan logo di pojok kiri bawah
     var logoControl = L.control({
       position: 'bottomleft'
     });
@@ -274,7 +275,6 @@
 
     logoControl.addTo(map);
 
-
     // Buat fungsi untuk menyesuaikan ukuran peta saat ukuran halaman berubah
     function resizeMap() {
       var mapContainer = document.getElementById("map");
@@ -287,40 +287,33 @@
     window.addEventListener("resize", resizeMap);
     window.addEventListener("DOMContentLoaded", resizeMap);
 
-
-
-    //mengaktifkan basemaps ke dalam leaflet
-
-    /* Control Layer Tree */
-
+    // Menambahkan basemaps ke dalam leaflet
     var googleStreets = L.tileLayer(
       "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
       {
         maxZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        attribution: 'WebGIS Design © <a href="https://www.youtube.com/channel/UCw1KKeYlrcgVf4-PGDyvG2Q" target=_blank >Mai Warman</a> 2024',
       }
     );
+
     var googleHybrid = L.tileLayer(
       "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}",
       {
         maxZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        attribution: 'WebGIS Design © <a href="https://www.youtube.com/channel/UCw1KKeYlrcgVf4-PGDyvG2Q" target=_blank >Mai Warman</a> 2024',
       }
     );
-    var googleSat = L.tileLayer(
-      "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
-      {
-        maxZoom: 20,
-        subdomains: ["mt0", "mt1", "mt2", "mt3"],
-      }
-    );
-    var googleTerrain = L.tileLayer(
-      "http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",
-      {
-        maxZoom: 20,
-        subdomains: ["mt0", "mt1", "mt2", "mt3"],
-      }
-    );
+
+    // Control layer untuk switching basemaps
+    var baseMaps = {
+      "OpenStreetMap": OpenStreetMap,
+      "Google Streets": googleStreets,
+      "Google Hybrid": googleHybrid,
+      // Tambahkan layer tambahan jika diperlukan di sini
+    };
+
 
 
     // ini khusus untuk codingan GUA
